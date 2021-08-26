@@ -16,19 +16,21 @@ module.exports.run = async (bot, guild, message, args) => {
     })
     message.channel.stopTyping(true)
   } else {
-    if (!parseInt(args[1])) return 'Invalid number/item'
-    let index = parseInt(args[1])
+    for (var i = 1;i<args.length;i++){
+      if (!parseInt(args[i])) return 'Invalid number/item'
+      let index = parseInt(args[i])
 
-    getWatchlist().then(rows => {
-      if (!rows || rows.length == 0) return 'No existing items!'
-      let item = rows[index - 1]
-
-      if (!item) return 'Not an existing item!'
-      else {
-        removeWatchlistItem(bot, item.link).then(() => {
-          message.channel.send('Successfully removed item: ' + item.link)
-        })
-      }
-    })
+      getWatchlist().then(rows => {
+        if (!rows || rows.length == 0) return 'No existing items!'
+        let item = rows[index-1]
+  
+        if (!item) return 'Not an existing item!'
+        else {
+          removeWatchlistItem(bot, item.link).then(() => {
+            message.channel.send('Successfully removed item: ' + item.link)
+          })
+        }
+      })
+    }
   }
 }
