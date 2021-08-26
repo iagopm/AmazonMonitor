@@ -3,7 +3,7 @@ const { getWatchlist, removeWatchlistItem } = require('../common/data')
 module.exports = {
   name: 'unwatch',
   desc: 'Removes from the watchlist using at number. If no number is provided, returns the watchlist',
-  usage: 'unwatch [number]',
+  usage: 'unwatch [number] or unwatch [number] [number] ...',
   type: 'edit'
 }
 
