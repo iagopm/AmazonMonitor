@@ -1,4 +1,3 @@
-const { MessageEmbed } = require("discord.js");
 let  Parser  = require("rss-parser");
 
 let parser = new Parser();
