@@ -18,6 +18,8 @@ let userAgents = [
 ]
 let browser
 
+let todayHasBeenPublished = 0;
+
 /**
  * Format prices 
  */
@@ -199,9 +201,9 @@ exports.startWatcher = async (bot) => {
     eldenRing(bot);
   }, (86400000/5)||12000),
 
-  // Is 9 a.m M-S
+  // Is 10 a.m M-S
   setInterval(() => {
-    if(is9AM){
+    if(is10AM && !todayHasntBeenPublished()){
       vandalNews(bot);
     }
   }, (300000) || 120000),
@@ -211,6 +213,10 @@ exports.startWatcher = async (bot) => {
     debug.log('Checking item prices...', 'message')
     if (bot.watchlist.length > 0) doCheck(bot, 0)
   }, (minutes_per_check * 60000) || 120000)
+}
+
+function todayHasntBeenPublished(){
+  return (new Date().getDay() == todayHasBeenPublished);
 }
 
 async function vandalNews(bot) {
@@ -227,9 +233,10 @@ async function vandalNews(bot) {
   for (var i = 0; i < noticiasArray.length; i++) {
     channel.send(noticiasArray[i]);
   }
+  todayHasBeenPublished = new Date().getDay();
 }
 
-function is9AM() {
+function is10AM() {
   return new Date().getHours() == 10;
 }
 
@@ -247,7 +254,7 @@ function eldenRing(bot) {
   const diffInDays = diffInTime / oneDay;
 
   let channel = bot.channels.cache.get("877874452849889280");
-  channel.send("Rei dice -> Elden ring " + diffInDays + " días restantes");
+  channel.send("TAISON dice -> Elden ring " + diffInDays + " días restantes");
 }
 
 /**

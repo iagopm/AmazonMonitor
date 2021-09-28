@@ -4,7 +4,6 @@ let parser = new Parser();
 
 const {vandal, news_channel} = require('../config.json')
 
-
 module.exports = {
   type: "view",
 };
