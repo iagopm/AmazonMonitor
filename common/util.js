@@ -203,8 +203,10 @@ exports.startWatcher = async (bot) => {
 
   // Is 10 a.m M-S
   setInterval(() => {
-    if(is10AM && !todayHasntBeenPublished()){
+    if(is10AM()){
+      if(!todayHasntBeenPublished()){
       vandalNews(bot);
+      }
     }
   }, (300000) || 120000),
 
