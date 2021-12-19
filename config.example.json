@@ -11,6 +11,5 @@
   "auto_cart_link":true,
   "debug_enabled":false,
   "news_channel":"news",
-  "vandal":"https://rss.xml",
-  "tresdjuegos":"https://rss.xml"
+  "vandal":"https://rss.xml"
 }
