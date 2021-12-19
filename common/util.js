@@ -1,14 +1,13 @@
 const { MessageEmbed } = require('discord.js')
-const  Parser  = require("rss-parser");
 const pup = require('puppeteer')
 const { proxyRequest } = require('puppeteer-proxy')
 const cheerio = require('cheerio')
 const fs = require('fs')
 const amazon = require('./Amazon')
 const debug = require('./debug')
-const { getWatchlist, updateWatchlistItem, addWatchlistItem, removeWatchlistItem } = require('./data')
-const { vandal,news_channel,date, auto_cart_link, cache_limit, tld, minutes_per_check } = require('../config.json')
-const parser = new Parser();
+const {startRoutines} = require('./customRoutines')
+const {getWatchlist, updateWatchlistItem, addWatchlistItem, removeWatchlistItem } = require('./data')
+const {auto_cart_link, cache_limit, tld, minutes_per_check } = require('../config.json')
 
 let userAgents = [
   'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0',
@@ -17,8 +16,6 @@ let userAgents = [
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.62 Safari/537.36 Edg/81.0.416.31'
 ]
 let browser
-
-let todayHasBeenPublished = 0;
 
 /**
  * Format prices 
@@ -195,68 +192,13 @@ exports.startWatcher = async (bot) => {
     type: 'WATCHING'
   })
 
-  // Set an interval to publish elden ring
-  eldenRing(bot);
-  setInterval(() => {
-    eldenRing(bot);
-  }, (86400000/5)||12000),
-
-  // Is 10 a.m M-S
-  setInterval(() => {
-    if(is10AM()){
-      if(!todayHasntBeenPublished()){
-      vandalNews(bot);
-      }
-    }
-  }, (300000) || 120000),
+  startRoutines(bot);
 
   // Set an interval with an offset so we don't decimate Amazon with requests
   setInterval(() => {
     debug.log('Checking item prices...', 'message')
     if (bot.watchlist.length > 0) doCheck(bot, 0)
   }, (minutes_per_check * 60000) || 120000)
-}
-
-function todayHasntBeenPublished(){
-  return (new Date().getDay() == todayHasBeenPublished);
-}
-
-async function vandalNews(bot) {
-  var noticias = "";
-
-  let feed = await parser.parseURL(vandal);
-
-  feed.items.forEach((item) => {
-    noticias += item.title + "\n";
-  });
-  let channel = bot.channels.cache.get("877874452849889280");
-
-  var noticiasArray = noticias.match(/.{1,1999}/g);
-  for (var i = 0; i < noticiasArray.length; i++) {
-    channel.send(noticiasArray[i]);
-  }
-  todayHasBeenPublished = new Date().getDay();
-}
-
-function is10AM() {
-  return new Date().getHours() == 10;
-}
-
-function eldenRing(bot) {
-  const date1 = new Date(Date.now());
-  const date2 = new Date(date);
-
-  // One day in milliseconds
-  const oneDay = 1000 * 60 * 60 * 24;
-
-  // Calculating the time difference between two dates
-  const diffInTime = date2.getTime() - date1.getTime();
-
-  // Calculating the no. of days between two dates
-  const diffInDays = diffInTime / oneDay;
-
-  let channel = bot.channels.cache.get("877874452849889280");
-  channel.send("TAISON dice -> Elden ring " + diffInDays + " días restantes");
 }
 
 /**
