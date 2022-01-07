@@ -1,17 +1,15 @@
 const Parser = require("rss-parser");
-const pup = require('puppeteer')
-const { vandal, date } = require('../config.json')
+const pup = require('puppeteer');
+const cheerio = require('cheerio');
+const request = require('request');
+
+const { weather, vandal, date } = require('../config.json');
 const parser = new Parser();
 
-let todayHasBeenPublished = 0;
-
+let vandalPublished = 0;
+let weatherPublished = 0;
 exports.startRoutines = (bot) => {
 
-    // Set an interval to seriess
-    seriess(bot);
-    setInterval(() => {
-        seriess(bot);
-    }, (180000) || 12000),
     // Set an interval to publish elden ring
     eldenRing(bot);
     setInterval(() => {
@@ -21,50 +19,62 @@ exports.startRoutines = (bot) => {
     // Is 10 a.m M-S
     setInterval(() => {
         if (is10AM()) {
-            if (!todayHasntBeenPublished()) {
+            if (!vandalAlreadyPublished()) {
                 vandalNews(bot);
+            }
+        }
+    }, (300000) || 120000),
+    
+    setInterval(() => {
+        if (is10AM()) {
+            if (!weatherAlreadyPublished()) {
+                weatherCoruna(bot);
             }
         }
     }, (300000) || 120000)
 }
 
-function todayHasntBeenPublished() {
-    return (new Date().getDay() == todayHasBeenPublished);
+
+
+function weatherAlreadyPublished() {
+    return (new Date().getDay() == weatherPublished);
 }
 
-async function seriess(bot) {
-    var stock = true;
-    let channel = bot.channels.cache.get("877874452849889280");
-
-    (async () => {
-
-        const browser = await pup.launch()
-
-        const page = await browser.newPage()
-
-        await page.goto('https://www.movistar.es/particulares/fusion/elige-smartphone')
-
-        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-
-        await sleep(4000)
-
-        const data = await page.evaluate(() => {
-            const tds = Array.from(document.querySelectorAll('.OutOfStock'))
-            return tds.map(td => td.innerText)
-        });
-
-        for (var i = 0; i < data.length; i++) {
-            if (data[i].includes("Series S")) {
-                stock = false;
+async function weatherCoruna(bot) {
+    request(weather, function (error, response, html) {
+        if (!error && response.statusCode == 200) {
+            var prediccion = "[La Coruña] \n";
+            var $ = cheerio.load(html, {
+                xmlMode: true
+            });
+            let dias = $('dia');
+            for (var i = 0; i < dias.length; i++) {
+                let dia = dias[i];
+                //fecha
+                var fecha = $(dia).attr('fecha');
+                prediccion += "Dia ->" + fecha;
+                //temperatura
+                var min = $(dia).children('temperatura').children('minima').text();
+                var max = $(dia).children('temperatura').children('maxima').text();
+                prediccion += " la temp.min ->" + min + "º  la temp.max ->" + max + "º ";
+                //cond climatica
+                var estadoCielo = $(dia).children('estado_cielo');
+                for (var j = 0; j < estadoCielo.length; j++) {
+                    if (!($(estadoCielo[j]).attr('descripcion')=="")) {
+                        prediccion += "[" + $(estadoCielo[j]).attr('descripcion') + "]\n"
+                        break;
+                    }
+                }
             }
+            let channel = bot.channels.cache.get("877874452849889280");
+            channel.send(prediccion);
+            weatherPublished = new Date().getDay();
         }
-        browser.close()
-        if (stock) {
-            channel.send("Series S -> " + stock);
-        }
-    })()
+    });
+}
 
-
+function vandalAlreadyPublished() {
+    return (new Date().getDay() == vandalPublished);
 }
 
 async function vandalNews(bot) {
@@ -81,7 +91,7 @@ async function vandalNews(bot) {
     for (var i = 0; i < noticiasArray.length; i++) {
         channel.send(noticiasArray[i]);
     }
-    todayHasBeenPublished = new Date().getDay();
+    vandalPublished = new Date().getDay();
 }
 
 function is10AM() {
