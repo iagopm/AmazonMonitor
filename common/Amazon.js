@@ -56,9 +56,9 @@ exports.categoryDetails = async (bot, l) => {
 
   try {
     node = l.split('node=')[1]
-    if (node.includes('&')) node = node.split('&')[0]
+    if (node?.includes('&')) node = node.split('&')[0]
     ie = l.split('ie=')[1]
-    if (ie.includes('&')) ie = ie.split('&')[0]
+    if (ie?.includes('&')) ie = ie.split('&')[0]
     tld = l.split('amazon.')[1].split('/')[0]
     path = l.split(tld + '/')[1].split('?')[0]
   } catch (e) {
@@ -183,8 +183,10 @@ function getRegularItem($, l) {
   debug.log('Detected as a regular item', 'debug')
   let priceElms = [
     $('#priceblock_ourprice').text().trim(),
-    $('#priceblock_saleprice').text().trim()
+    $('#priceblock_saleprice').text().trim(),
+    $('.a-price').eq(1).text().trim()
   ]
+  console.log(priceElms)
   let shippingElms = [
     $('#ourprice_shippingmessage').find('.a-icon-prime') ? 'Free with prime' : $('#ourprice_shippingmessage').find('.a-color-secondary').text().trim(),
     $('#saleprice_shippingmessage').find('b').text().trim()
